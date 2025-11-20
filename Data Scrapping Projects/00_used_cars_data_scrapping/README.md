@@ -31,14 +31,13 @@ Follow these steps to clone the repository, and run the notebook.
 ```powershell
 git clone https://github.com/mtahashahid/cloud-data-engineering.git
 cd cloud-data-engineering 
-Set-Location .\cloud-data-engineering\"Data Scrapping Projects"\"00_used_cars_data_scrapping"
 ```
 
 2) Open and run the notebook interactively:
 
 ```powershell
 jupyter lab
-# then open used_cars_data_scrapping.ipynb and run cells in order
+# then open used_cars_data_scrapping.ipynb and run main cell.
 ```
 
 Run pipeline as a script (quick method)
@@ -59,7 +58,6 @@ Notes & cautions
 - The notebook targets `https://www.pakwheels.com/used-cars/search/-/featured_1/` and relies on the page structure. If PakWheels changes their HTML layout or CSS classes, the parser will need updates.
 - Respect the target site's `robots.txt` and terms of service. Add delays and backoff if running automated scraping to avoid being blocked.
 - The example SQL connection string inside the notebook is for demonstration. If you plan to upload to SQL Server, ensure `pyodbc` is configured and the appropriate ODBC driver is installed on your system.
-- Consider adding a `requirements.txt` or `environment.yml` to pin dependency versions for reproducible runs.
  
 Suggested next steps
 
