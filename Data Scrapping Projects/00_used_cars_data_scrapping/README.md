@@ -53,6 +53,8 @@ python used_cars_data_scrapping.py
 
 Extract → Save Raw CSV → Load Raw CSV → Clean → Save Clean CSV → Database Connection → Load to DB (SQL Server)
 
+![ETL Flow Diagram](flow_diagram.png)
+
 Notes & cautions
 
 - The notebook targets `https://www.pakwheels.com/used-cars/search/-/featured_1/` and relies on the page structure. If PakWheels changes their HTML layout or CSS classes, the parser will need updates.
