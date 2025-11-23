@@ -67,7 +67,7 @@
     FROM [Car Electronics]
     ORDER BY reviews DESC;
     ```
-
+![Flow Diagram](flow_diagram.png)
   - Additional useful queries:
     - Average `value_score` per category
     - Count of `high_engagement` products per category
