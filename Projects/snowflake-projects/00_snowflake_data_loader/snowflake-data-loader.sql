@@ -1,0 +1,100 @@
+CREATE DATABASE SL_DB;
+CREATE SCHEMA SL_DB.SL_SCHEMA;
+
+-- CUSTOMER_DETAILS table
+CREATE TABLE CUSTOMER_DETAILS (
+    first_name STRING,
+    last_name STRING,
+    address STRING,
+    city STRING,
+    state STRING
+);
+-- TESLA_STOCKS table
+CREATE OR REPLACE TABLE TESLA_STOCKS(
+	date DATE,
+	open_value DOUBLE,
+	high_vlaue DOUBLE,
+	low_value DOUBLE,
+	close_vlaue DOUBLE,
+	adj_close_value DOUBLE,
+	volume BIGINT
+);
+
+-- table should be empty
+SELECT * FROM CUSTOMER_DETAILS;
+SELECT * FROM TESLA_STOCKS;
+
+-- creating S3 integration
+CREATE OR REPLACE STORAGE INTEGRATION S3_INTEGRATION
+	TYPE = EXTERNAL_STAGE
+	STORAGE_PROVIDER = 'S3'
+	STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::842382860474:role/role-snowflake-loading'
+	ENABLED = TRUE
+	STORAGE_ALLOWED_LOCATIONS = ('s3://snowflake-data-loading-cd/');
+
+-- granting access to S3 integration
+DESC INTEGRATION S3_INTEGRATION;
+
+-- creating stage for copying the data from S3 bucket TESLA_STOCKS
+CREATE OR REPLACE STAGE S3_INTEGRATEION_BULK_COPY_TESLA_STOCKS
+	STORAGE_INTEGRATION = S3_INTEGRATION
+	URL = 's3://snowflake-data-loading-cd/TSLA.csv'
+	FILE_FORMAT = (TYPE = 'CSV', FIELD_DELIMITER = ',', SKIP_HEADER = 1);
+
+--validation
+list @S3_INTEGRATEION_BULK_COPY_TESLA_STOCKS;
+
+-- copying data
+COPY INTO TESLA_STOCKS 
+FROM @S3_INTEGRATEION_BULK_COPY_TESLA_STOCKS;
+
+-- view data
+SELECT * from TESLA_STOCKS 
+
+-- TRUNCATE customer details table
+TRUNCATE CUSTOMER_DETAILS
+
+-- creating stage for copying the data from S3 bucket CUSTOMER_DETAILS
+CREATE OR REPLACE STAGE S3_INTEGRATEION_BULK_COPY_CUSTOMER_DETAILS
+	STORAGE_INTEGRATION = S3_INTEGRATION
+	URL = 's3://snowflake-data-loading-cd/customer_detail.csv'
+	FILE_FORMAT = (TYPE = 'CSV', FIELD_DELIMITER = '|', SKIP_HEADER = 1);
+
+--validation
+list @S3_INTEGRATEION_BULK_COPY_CUSTOMER_DETAILS;
+
+COPY INTO CUSTOMER_DETAILS
+FROM @S3_INTEGRATEION_BULK_COPY_CUSTOMER_DETAILS;
+
+-- view data
+SELECT * FROM CUSTOMER_DETAILS;
+
+-- TRUNCATE customer details table
+TRUNCATE TESLA_STOCKS
+
+-- view data
+SELECT * from TESLA_STOCKS
+
+-- creating stage
+CREATE OR REPLACE STAGE BULK_COPY_TESLA_STOCKS
+	URL = 's3://snowflake-data-loading-cd/TSLA.csv'
+	CREDENTIALS = (AWS_KEY_ID='placeholder', AWS_SECRET_KEY='placeholder');
+
+COPY INTO TESLA_STOCKS
+	FROM @BULK_COPY_TESLA_STOCKS
+	FILE_FORMAT = (TYPE = 'CSV', FIELD_DELIMITER = ',', SKIP_HEADER = 1)
+	ON_ERROR = 'skip_file';
+
+SELECT * from TESLA_STOCKS
+
+-- copyinh the data through pipe
+CREATE OR REPLACE PIPE S3_TESLA_PIPE
+AUTO_INGEST=TRUE 
+AS
+COPY INTO TESLA_STOCKS FROM @S3_INTEGRATEION_BULK_COPY_TESLA_STOCKS;
+
+SHOW PIPES;
+
+-- view data
+SELECT * from TESLA_STOCKS where year(date) = '2026' limit 5;
+SELECT max(DATE) FROM TESLA_STOCKS AT(OFFSET => -3600) ORDER BY DATE DESC;
