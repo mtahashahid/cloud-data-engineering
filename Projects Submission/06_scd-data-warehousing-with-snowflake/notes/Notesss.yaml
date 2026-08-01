@@ -1,0 +1,23 @@
+ssh -i "kp-scd-warehousing-md.pem" ec2-user@ec2-3-88-17-235.compute-1.amazonaws.com
+
+
+ssh -i "kp-scd-warehousing-md.pem" ec2-user@ec2-3-88-17-235.compute-1.amazonaws.com
+ssh -i "kp-scd-warehousing-md.pem" ec2-user@ec2-3-88-17-235.compute-1.amazonaws.com -L 2081:localhost:2041 -L 4888:localhost:4888 -L 2080:localhost:2080 -L 8050:localhost:8050 -L 4141:localhost:4141
+scp -r -i "kp-scd-warehousing-md.pem" docker_exp ec2-user@ec2-3-88-17-235.compute-1.amazonaws.com:/home/ec2-user/docker_exp
+
+sudo yum update -y
+sudo yum install docker
+sudo yum install -y libxcrypt-compat
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo gpasswd -a $USER docker
+newgrp docker
+sudo systemctl start docker
+docker-compose up -d
+sudo systemctl stop docker
+
+
+
+vi docker-compse.yml 
+to go into insertion mode, press i
+to save and exit, press esc, then type (shift + :) :wq and press enter
